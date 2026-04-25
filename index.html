@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이야기 — AI Visual Novel Engine</title>
+  <meta name="description" content="시놉시스 한 줄이면 완성되는 비주얼 노벨. 스토리·캐릭터·배경·BGM 전부 AI가 만들어줍니다.">
+
+  <!-- Pretendard -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+
+  <style>
+    :root {
+      --bg:        #090912;
+      --bg-1:      #0e0e1c;
+      --bg-2:      #13132a;
+      --bg-glass:  rgba(255,255,255,0.04);
+      --border:    rgba(255,255,255,0.08);
+      --border-hi: rgba(160,140,255,0.35);
+
+      --purple:    #a08cff;
+      --purple-d:  #7b65e8;
+      --pink:      #f07aff;
+      --gold:      #e8c97a;
+      --text:      #f4f2ff;
+      --text-sub:  #9996be;
+      --text-dim:  #4e4c70;
+
+      --glow-purple: 0 0 40px rgba(160,140,255,0.25);
+      --glow-pink:   0 0 40px rgba(240,122,255,0.2);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Pretendard', sans-serif;
+      font-weight: 400;
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ───── GLOBAL BACKGROUNDS ───── */
+    body::before {
+      content:'';
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 70% 55% at 15% 0%,   rgba(120,90,255,0.14) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 45% at 85% 15%,  rgba(240,122,255,0.10) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 50% 100%, rgba(100,80,220,0.08) 0%, transparent 65%);
+    }
+
+    /* star dust noise */
+    body::after {
+      content:'';
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+      opacity:.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+    }
+
+    /* z-index wrap */
+    nav, main, section, footer { position:relative; z-index:1; }
+
+    /* ───── NAV ───── */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:200;
+      height: 64px;
+      display: flex; align-items:center; justify-content:space-between;
+      padding: 0 2.5rem;
+      background: rgba(9,9,18,0.75);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display:flex; align-items:center; gap:.7rem;
+      text-decoration:none; color:var(--text);
+    }
+
+    .logo-icon {
+      width:32px; height:32px; border-radius:9px;
+      background: linear-gradient(135deg, var(--purple-d) 0%, var(--pink) 100%);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.95rem; font-weight:800; color:#fff;
+      box-shadow: 0 0 16px rgba(160,140,255,0.5);
+    }
+
+    .logo-text {
+      font-size:1.05rem; font-weight:700; letter-spacing:-.02em;
+      background: linear-gradient(90deg, var(--text) 0%, var(--text-sub) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip:text;
+    }
+
+    .nav-links {
+      display:flex; align-items:center; gap:.25rem;
+      list-style:none;
+    }
+
+    .nav-links a {
+      display:block; padding:.45rem .9rem; border-radius:8px;
+      font-size:.875rem; font-weight:500; color:var(--text-sub);
+      text-decoration:none; transition:color .15s, background .15s;
+    }
+    .nav-links a:hover { color:var(--text); background:var(--bg-glass); }
+
+    .btn-nav {
+      background: linear-gradient(135deg, var(--purple-d) 0%, var(--pink) 100%);
+      color:#fff !important; font-weight:700 !important;
+      padding:.45rem 1.2rem !important; border-radius:8px;
+      box-shadow: 0 0 20px rgba(160,140,255,0.3);
+      transition: box-shadow .2s, transform .2s !important;
+    }
+    .btn-nav:hover { box-shadow: 0 0 32px rgba(160,140,255,0.6) !important; transform:translateY(-1px) !important; background:var(--bg-glass)!important; }
+
+    /* ───── HERO ───── */
+    #hero {
+      min-height:100vh;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center;
+      padding: 8rem 1.5rem 5rem;
+    }
+
+    /* 배경 빛 기둥 */
+    .hero-glow {
+      position:absolute;
+      top:0; left:50%; transform:translateX(-50%);
+      width:600px; height:500px;
+      background: radial-gradient(ellipse at center, rgba(130,100,255,0.18) 0%, transparent 70%);
+      pointer-events:none;
+    }
+
+    .hero-eyebrow {
+      display:inline-flex; align-items:center; gap:.5rem;
+      border:1px solid rgba(160,140,255,0.3);
+      background: rgba(160,140,255,0.06);
+      color:var(--purple); font-size:.78rem; font-weight:600;
+      letter-spacing:.06em; text-transform:uppercase;
+      padding:.35rem 1rem; border-radius:100px;
+      margin-bottom:2.2rem;
+      animation:fadeUp .6s .1s both;
+    }
+
+    .eyebrow-dot {
+      width:5px; height:5px; border-radius:50%;
+      background:var(--purple);
+      animation:pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100%{opacity:1;transform:scale(1)}
+      50%{opacity:.4;transform:scale(.75)}
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 7.5vw, 5.6rem);
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      animation: fadeUp .7s .2s both;
+    }
+
+    .h1-line1 { display:block; color:var(--text); }
+    .h1-line2 {
+      display:block;
+      background: linear-gradient(90deg, var(--purple) 0%, var(--pink) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+
+    .hero-desc {
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      font-weight:400; color:var(--text-sub);
+      max-width:520px; margin:0 auto 3rem;
+      line-height:1.8;
+      animation:fadeUp .7s .3s both;
+    }
+
+    /* ─ 이메일 폼 ─ */
+    .form-wrap {
+      display:flex; flex-direction:column; align-items:center;
+      gap:.75rem; animation:fadeUp .7s .4s both;
+    }
+
+    .email-row {
+      display:flex; gap:.5rem;
+      background:rgba(255,255,255,0.05);
+      border:1px solid var(--border-hi);
+      border-radius:14px;
+      padding:.4rem .4rem .4rem 1.2rem;
+      max-width:440px; width:100%;
+      box-shadow: 0 0 0 0 rgba(160,140,255,0);
+      transition:box-shadow .3s;
+    }
+    .email-row:focus-within {
+      box-shadow: 0 0 0 3px rgba(160,140,255,0.25), var(--glow-purple);
+      border-color:var(--purple);
+    }
+
+    .email-row input {
+      flex:1; min-width:0;
+      background:none; border:none; outline:none;
+      font-family:'Pretendard',sans-serif; font-size:.92rem;
+      color:var(--text);
+    }
+    .email-row input::placeholder { color:var(--text-dim); }
+
+    .btn-submit {
+      background:linear-gradient(135deg,var(--purple-d) 0%,var(--pink) 100%);
+      border:none; color:#fff;
+      font-family:'Pretendard',sans-serif;
+      font-size:.875rem; font-weight:700;
+      padding:.7rem 1.4rem; border-radius:10px;
+      cursor:pointer; white-space:nowrap;
+      box-shadow:0 0 20px rgba(160,140,255,0.35);
+      transition:box-shadow .2s,transform .2s;
+    }
+    .btn-submit:hover { box-shadow:0 0 36px rgba(160,140,255,0.6); transform:translateY(-1px); }
+
+    .form-hint {
+      font-size:.78rem; color:var(--text-dim);
+    }
+    .form-hint strong { color:var(--pink); font-weight:600; }
+    .form-hint s { text-decoration-color:rgba(255,255,255,.2); }
+
+    .success-msg {
+      display:none;
+      background:rgba(160,140,255,0.1);
+      border:1px solid rgba(160,140,255,0.3);
+      color:var(--purple); padding:.9rem 1.8rem;
+      border-radius:12px; font-size:.9rem; font-weight:500;
+    }
+
+    @keyframes fadeUp {
+      from{opacity:0;transform:translateY(22px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* ───── DIVIDER ───── */
+    .section-divider {
+      border:none;
+      height:1px;
+      background:linear-gradient(90deg,transparent,var(--border),transparent);
+      margin:0;
+    }
+
+    /* ───── PROOF BAR ───── */
+    #proof {
+      padding:2.5rem 1.5rem;
+      display:flex; align-items:center; justify-content:center;
+      gap:2.5rem; flex-wrap:wrap;
+      background:rgba(255,255,255,0.015);
+    }
+
+    .proof-item {
+      display:flex; align-items:center; gap:.7rem;
+    }
+
+    .proof-avatar-stack { display:flex; }
+    .proof-avatar {
+      width:34px; height:34px; border-radius:50%;
+      border:2px solid var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.72rem; font-weight:700; color:#fff;
+      margin-left:-10px;
+    }
+    .proof-avatar:first-child{margin-left:0;}
+
+    .proof-stat { font-size:.85rem; }
+    .proof-stat strong { color:var(--text); font-weight:700; }
+    .proof-stat span { color:var(--text-sub); }
+
+    .proof-sep { width:1px; height:24px; background:var(--border); }
+
+    .proof-stars { color:#e8c97a; font-size:.9rem; }
+    .proof-stars span { color:var(--text-sub); font-size:.78rem; margin-left:.3rem; }
+
+    /* ───── HOW IT WORKS ───── */
+    #how {
+      padding:7rem 1.5rem;
+      max-width:1000px; margin:0 auto;
+      text-align:center;
+    }
+
+    .chip {
+      display:inline-flex; align-items:center; gap:.4rem;
+      background:rgba(160,140,255,0.08);
+      border:1px solid rgba(160,140,255,0.2);
+      color:var(--purple); font-size:.72rem; font-weight:700;
+      letter-spacing:.08em; text-transform:uppercase;
+      padding:.28rem .8rem; border-radius:100px;
+      margin-bottom:1.2rem;
+    }
+
+    .section-h2 {
+      font-size:clamp(1.7rem,4vw,2.6rem);
+      font-weight:800; letter-spacing:-.03em;
+      color:var(--text); margin-bottom:.8rem; line-height:1.2;
+    }
+
+    .section-p {
+      font-size:.97rem; color:var(--text-sub);
+      max-width:440px; margin:0 auto 4rem; line-height:1.75;
+    }
+
+    /* 데모 윈도우 */
+    .demo-window {
+      background:var(--bg-1);
+      border:1px solid var(--border-hi);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(160,140,255,.08), var(--glow-purple);
+      text-align:left;
+    }
+
+    .demo-bar {
+      background:var(--bg-2);
+      border-bottom:1px solid var(--border);
+      padding:.7rem 1.1rem;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .mac-dot{width:10px;height:10px;border-radius:50%;}
+    .mac-red{background:#ff5f57;} .mac-yel{background:#febc2e;} .mac-grn{background:#28c840;}
+    .demo-url{flex:1;text-align:center;font-size:.72rem;color:var(--text-dim);font-family:monospace;}
+
+    .demo-body {
+      display:grid; grid-template-columns:1fr 1fr; gap:0;
+    }
+    @media(max-width:640px){.demo-body{grid-template-columns:1fr;}}
+
+    .demo-left {
+      padding:1.5rem; border-right:1px solid var(--border);
+      display:flex; flex-direction:column; gap:1rem;
+    }
+
+    .demo-label {
+      font-size:.65rem; font-weight:700; color:var(--purple);
+      letter-spacing:.1em; text-transform:uppercase; font-family:monospace;
+    }
+
+    .demo-input-box {
+      background:var(--bg-2); border-radius:8px; padding:.9rem 1rem;
+      font-size:.8rem; color:#c0bce0; line-height:1.6;
+      border:1px solid var(--border);
+      font-style:italic;
+    }
+
+    .demo-steps { display:flex; flex-direction:column; gap:.45rem; }
+    .demo-step {
+      display:flex; align-items:center; gap:.55rem;
+      font-size:.75rem; color:var(--text-dim); font-family:monospace;
+    }
+    .demo-step.done  { color:#6ee7b7; }
+    .demo-step.active{ color:var(--purple); animation:blinkText 1.2s ease-in-out infinite; }
+    @keyframes blinkText{0%,100%{opacity:1}50%{opacity:.3}}
+
+    .demo-right {
+      /* VN Preview */
+      background:linear-gradient(180deg,#0d0820 0%,#050312 100%);
+      min-height:260px;
+      display:flex; flex-direction:column; justify-content:flex-end;
+      padding:1rem;
+      position:relative; overflow:hidden;
+    }
+
+    /* 배경 이펙트 */
+    .vn-bg-glow {
+      position:absolute; inset:0;
+      background:radial-gradient(ellipse 80% 60% at 30% 40%, rgba(120,80,255,0.2) 0%, transparent 70%);
+    }
+
+    .vn-char-group {
+      position:absolute; bottom:3.5rem; left:0; right:0;
+      display:flex; justify-content:center; gap:1.5rem; align-items:flex-end;
+    }
+
+    .vn-char {
+      border-radius:8px 8px 0 0;
+      position:relative; overflow:hidden;
+    }
+
+    .vn-char::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg,transparent 60%,rgba(5,3,18,.8) 100%);
+    }
+
+    .vn-char-a {
+      width:44px; height:76px;
+      background:linear-gradient(180deg,#b39dff 0%,#7c4dff 50%,#3d206e 100%);
+      opacity:.55; transform:scale(.92);
+    }
+    .vn-char-b {
+      width:48px; height:88px;
+      background:linear-gradient(180deg,#ffd4a8 0%,#c9813a 35%,#3a1060 100%);
+    }
+
+    .vn-face-a { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:16px; height:16px; background:#e8c4a0; border-radius:50%; z-index:2; }
+    .vn-face-b { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:18px; height:18px; background:#fbd5b0; border-radius:50%; z-index:2; }
+
+    .vn-dialogue-wrap { position:relative; z-index:5; }
+
+    .vn-namebox {
+      display:inline-block;
+      background:linear-gradient(90deg,var(--purple-d),var(--pink));
+      color:#fff; font-size:.62rem; font-weight:700;
+      padding:.15rem .55rem; border-radius:5px 5px 0 0;
+      margin-bottom:-1px;
+    }
+
+    .vn-textbox {
+      background:rgba(8,5,25,0.92);
+      border:1px solid rgba(160,140,255,0.25);
+      border-radius:0 8px 8px 8px; padding:.7rem .85rem;
+      font-size:.72rem; color:#d4d0f0; line-height:1.55;
+      margin-bottom:.6rem;
+    }
+
+    .vn-choices { display:flex; flex-direction:column; gap:.35rem; }
+    .vn-choice {
+      background:rgba(160,140,255,0.08);
+      border:1px solid rgba(160,140,255,0.2);
+      color:var(--purple); font-size:.65rem; font-weight:600;
+      padding:.35rem .7rem; border-radius:6px; cursor:pointer;
+      transition:background .15s;
+    }
+    .vn-choice:first-child{background:rgba(160,140,255,0.18);border-color:rgba(160,140,255,.4);}
+    .vn-choice:hover{background:rgba(160,140,255,0.25);}
+
+    /* ───── STEPS ───── */
+    #steps {
+      padding:0 1.5rem 7rem;
+      max-width:900px; margin:0 auto; text-align:center;
+    }
+
+    .steps-row {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem;
+      margin-top:1rem;
+    }
+    @media(max-width:640px){.steps-row{grid-template-columns:1fr;}}
+
+    .step-card {
+      background:var(--bg-glass);
+      border:1px solid var(--border);
+      border-radius:16px; padding:2rem 1.5rem;
+      text-align:left;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    .step-card:hover{border-color:var(--border-hi);box-shadow:var(--glow-purple);}
+
+    .step-num {
+      width:34px;height:34px;border-radius:10px;
+      background:linear-gradient(135deg,var(--purple-d),var(--pink));
+      color:#fff; font-size:.85rem; font-weight:800;
+      display:flex;align-items:center;justify-content:center;
+      margin-bottom:1.1rem;
+      box-shadow:0 0 16px rgba(160,140,255,.3);
+    }
+
+    .step-card h3 { font-size:1rem; font-weight:700; margin-bottom:.4rem; }
+    .step-card p { font-size:.85rem; color:var(--text-sub); line-height:1.65; }
+
+    /* ───── FEATURES ───── */
+    #features {
+      padding:7rem 1.5rem;
+      background:linear-gradient(180deg,transparent,rgba(160,140,255,0.03),transparent);
+      border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+    }
+
+    .features-inner { max-width:960px; margin:0 auto; text-align:center; }
+
+    .features-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:1px;
+      border:1px solid var(--border); border-radius:18px; overflow:hidden;
+      margin-top:3rem;
+    }
+
+    .feat {
+      padding:2rem 1.5rem;
+      background:var(--bg-1);
+      text-align:left;
+      transition:background .2s;
+    }
+    .feat:hover { background:var(--bg-2); }
+
+    .feat-icon {
+      font-size:1.6rem; margin-bottom:1rem;
+      display:block;
+    }
+    .feat h4 { font-size:.95rem; font-weight:700; margin-bottom:.35rem; }
+    .feat p  { font-size:.83rem; color:var(--text-sub); line-height:1.65; }
+
+    /* ───── PRICING ───── */
+    #pricing {
+      padding:7rem 1.5rem;
+      max-width:860px; margin:0 auto; text-align:center;
+    }
+
+    .pricing-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem;
+      margin-top:3rem; align-items:stretch;
+    }
+    @media(max-width:720px){.pricing-grid{grid-template-columns:1fr;}}
+
+    .price-card {
+      background:var(--bg-1);
+      border:1px solid var(--border);
+      border-radius:18px; padding:1.8rem;
+      text-align:left; position:relative;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    .price-card:hover{border-color:var(--border-hi);box-shadow:var(--glow-purple);}
+
+    .price-card.featured {
+      border-color:rgba(160,140,255,.5);
+      background:linear-gradient(160deg,rgba(120,90,255,.08),rgba(240,122,255,.04));
+      box-shadow:0 0 0 1px rgba(160,140,255,.15),var(--glow-purple);
+    }
+
+    .feat-label {
+      position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+      background:linear-gradient(90deg,var(--purple-d),var(--pink));
+      color:#fff; font-size:.68rem; font-weight:800;
+      padding:.2rem .85rem; border-radius:100px;
+      white-space:nowrap; letter-spacing:.04em;
+    }
+
+    .price-tier {
+      font-size:.72rem; font-weight:700; color:var(--text-dim);
+      letter-spacing:.12em; text-transform:uppercase; margin-bottom:1rem;
+    }
+
+    .price-main {
+      font-size:2.5rem; font-weight:800; letter-spacing:-.04em; line-height:1;
+      margin-bottom:.2rem;
+    }
+    .price-main.gradient{
+      background:linear-gradient(90deg,var(--purple),var(--pink));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .price-period { font-size:.8rem; color:var(--text-dim); margin-bottom:.3rem; }
+
+    .price-orig { font-size:.78rem; color:var(--text-dim); margin-bottom:1.2rem; }
+    .price-orig s{text-decoration-color:rgba(255,255,255,.2);}
+    .price-orig .disc{color:var(--pink);font-weight:700;}
+
+    .price-divider{height:1px;background:var(--border);margin:1.1rem 0;}
+
+    .price-list { list-style:none; display:flex; flex-direction:column; gap:.55rem; margin-bottom:1.5rem; }
+    .price-list li {
+      display:flex;align-items:flex-start;gap:.6rem;
+      font-size:.83rem;color:var(--text-sub);
+    }
+    .price-list .ck{color:var(--purple);font-size:.8rem;margin-top:.05rem;}
+    .price-list .no{color:var(--text-dim);font-size:.8rem;margin-top:.05rem;}
+    .price-list .dim{color:var(--text-dim);}
+
+    .btn-price {
+      display:block;width:100%;text-align:center;
+      padding:.75rem;border-radius:10px;
+      font-family:'Pretendard',sans-serif;font-size:.88rem;font-weight:700;
+      text-decoration:none;cursor:pointer;transition:all .15s;border:none;
+    }
+    .btn-price.fill {
+      background:linear-gradient(135deg,var(--purple-d),var(--pink));
+      color:#fff;box-shadow:0 0 20px rgba(160,140,255,.35);
+    }
+    .btn-price.fill:hover{box-shadow:0 0 36px rgba(160,140,255,.6);transform:translateY(-1px);}
+    .btn-price.outline{background:none;color:var(--purple);border:1.5px solid rgba(160,140,255,.35);}
+    .btn-price.outline:hover{background:rgba(160,140,255,.08);}
+    .btn-price:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+    .spots-row{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.75rem;font-size:.72rem;color:var(--text-dim);}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:pulse 1.5s ease-in-out infinite;}
+
+    /* ───── TESTIMONIALS ───── */
+    #testimonials{
+      padding:7rem 1.5rem;
+      border-top:1px solid var(--border);
+      background:rgba(255,255,255,0.01);
+    }
+    .test-inner{max-width:900px;margin:0 auto;text-align:center;}
+
+    .test-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:1rem;margin-top:3rem;
+    }
+
+    .test-card{
+      background:var(--bg-1);border:1px solid var(--border);border-radius:16px;
+      padding:1.5rem;text-align:left;
+      transition:border-color .2s;
+    }
+    .test-card:hover{border-color:var(--border-hi);}
+
+    .test-stars{color:var(--gold);font-size:.82rem;margin-bottom:.8rem;letter-spacing:.05em;}
+
+    .test-card blockquote{
+      font-size:.88rem;color:var(--text);line-height:1.7;
+      margin-bottom:1.1rem;font-style:normal;
+      border-left:2px solid rgba(160,140,255,.3);padding-left:.9rem;
+    }
+
+    .test-author{display:flex;align-items:center;gap:.6rem;}
+    .test-ava{
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;
+    }
+    .test-name{font-size:.83rem;font-weight:700;}
+    .test-role{font-size:.75rem;color:var(--text-dim);}
+
+    /* ───── FAQ ───── */
+    #faq{
+      padding:7rem 1.5rem;border-top:1px solid var(--border);
+    }
+    .faq-inner{max-width:620px;margin:0 auto;text-align:center;}
+    .faq-list{margin-top:2.5rem;text-align:left;display:flex;flex-direction:column;gap:.5rem;}
+    .faq-item{
+      background:var(--bg-1);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+    }
+    .faq-q{
+      width:100%;background:none;border:none;text-align:left;
+      padding:1rem 1.2rem;font-family:'Pretendard',sans-serif;
+      font-size:.9rem;font-weight:600;color:var(--text);
+      cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+    }
+    .faq-q:hover{background:var(--bg-glass);}
+    .faq-chevron{color:var(--text-dim);transition:transform .2s;flex-shrink:0;}
+    .faq-item.open .faq-chevron{transform:rotate(180deg);}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+    .faq-item.open .faq-a{max-height:200px;}
+    .faq-a-inner{padding:.1rem 1.2rem 1rem;font-size:.86rem;color:var(--text-sub);line-height:1.75;border-top:1px solid var(--border);}
+
+    /* ───── CTA FINAL ───── */
+    #cta-final{
+      padding:8rem 1.5rem;text-align:center;
+      background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(130,100,255,.12) 0%,transparent 70%);
+      border-top:1px solid var(--border);
+    }
+
+    #cta-final h2{
+      font-size:clamp(2rem,5vw,3.4rem);font-weight:800;
+      letter-spacing:-.03em;line-height:1.15;margin-bottom:1rem;
+    }
+    #cta-final p{
+      color:var(--text-sub);font-size:1rem;
+      max-width:400px;margin:0 auto 2.5rem;line-height:1.7;
+    }
+
+    .btn-hero-cta{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:linear-gradient(135deg,var(--purple-d),var(--pink));
+      color:#fff;font-family:'Pretendard',sans-serif;
+      font-size:1rem;font-weight:700;
+      padding:.95rem 2.4rem;border-radius:14px;border:none;
+      cursor:pointer;text-decoration:none;
+      box-shadow:0 0 36px rgba(160,140,255,.4),0 8px 32px rgba(0,0,0,.4);
+      transition:box-shadow .2s,transform .2s;
+    }
+    .btn-hero-cta:hover{box-shadow:0 0 56px rgba(160,140,255,.65),0 12px 40px rgba(0,0,0,.4);transform:translateY(-2px);}
+
+    /* ───── FOOTER ───── */
+    footer{
+      border-top:1px solid var(--border);
+      padding:2rem 2.5rem;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+      font-size:.8rem;color:var(--text-dim);
+    }
+    .footer-logo{display:flex;align-items:center;gap:.6rem;color:var(--text-sub);}
+    .footer-logo .logo-icon{width:26px;height:26px;border-radius:7px;font-size:.78rem;box-shadow:none;}
+
+    /* ───── SCROLL REVEAL ───── */
+    .reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease;}
+    .reveal.in{opacity:1;transform:translateY(0);}
+
+    /* ───── RESPONSIVE ───── */
+    @media(max-width:500px){
+      .email-row{flex-direction:column;padding:.5rem;}
+      .btn-submit{width:100%;}
+      .nav-links{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">이</div>
+    <span class="logo-text">이야기&ensp;<span style="font-weight:400;font-size:.85rem;">iyagi</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">작동 방식</a></li>
+    <li><a href="#features">기능</a></li>
+    <li><a href="#pricing">가격</a></li>
+    <li><a href="#signup" class="btn-nav">얼리버드 신청</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow"></div>
+
+  <div class="hero-eyebrow">
+    <div class="eyebrow-dot"></div>
+    베타 테스터 모집 중 · 100명 한정
+  </div>
+
+  <h1>
+    <span class="h1-line1">시놉시스 한 줄이면</span>
+    <span class="h1-line2">비주얼 노벨 완성</span>
+  </h1>
+
+  <p class="hero-desc">
+    스토리·캐릭터·배경·BGM — AI가 전부 만들어줍니다.<br>
+    작가님은 아이디어만 주세요.
+  </p>
+
+  <div id="signup" class="form-wrap">
+    <form class="email-row" id="heroForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <input type="email" name="email" placeholder="이메일 주소를 입력하세요" required autocomplete="email">
+      <button type="submit" class="btn-submit">얼리버드 신청 →</button>
+    </form>
+    <div class="success-msg" id="successMsg">🎉 신청 완료! 베타 오픈 시 이메일로 알려드릴게요.</div>
+    <p class="form-hint">얼리버드 <strong>5,000원</strong> · 정가 <s>50,000원</s> · 무료 취소 가능</p>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- PROOF -->
+<div id="proof">
+  <div class="proof-item">
+    <div class="proof-avatar-stack">
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">김</div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">이</div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#14b8a6,#0ea5e9)">박</div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316)">최</div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,var(--purple-d),var(--pink))">+</div>
+    </div>
+    <div class="proof-stat"><strong>42명</strong>의 <span>작가가 베타 테스트 중</span></div>
+  </div>
+  <div class="proof-sep"></div>
+  <div class="proof-item">
+    <div class="proof-stars">★★★★★</div>
+    <div class="proof-stat"><strong>4.9</strong><span> / 5.0 평균 별점</span></div>
+  </div>
+  <div class="proof-sep"></div>
+  <div class="proof-item">
+    <div class="proof-stat"><strong>3분</strong><span> 평균 생성 시간</span></div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- HOW IT WORKS (DEMO) -->
+<section id="how">
+  <div class="chip">✦ Demo</div>
+  <h2 class="section-h2">이렇게 작동합니다</h2>
+  <p class="section-p">시놉시스를 입력하면 AI가 비주얼 노벨을 완성합니다</p>
+
+  <div class="demo-window reveal">
+    <div class="demo-bar">
+      <div class="mac-dot mac-red"></div>
+      <div class="mac-dot mac-yel"></div>
+      <div class="mac-dot mac-grn"></div>
+      <div class="demo-url">iyagi.ai/create</div>
+    </div>
+    <div class="demo-body">
+      <div class="demo-left">
+        <div>
+          <div class="demo-label">▸ 시놉시스 입력</div>
+          <div class="demo-input-box" style="margin-top:.5rem">
+            "마법학교에 입학한 평범한 소녀 하늘이 자신이 전설의 마법사 후손임을 깨닫는 이야기. 냉정한 엘리트 라이벌 천우와의 갈등과 성장..."
+          </div>
+        </div>
+        <div>
+          <div class="demo-label">▸ AI 생성 현황</div>
+          <div class="demo-steps" style="margin-top:.5rem">
+            <div class="demo-step done"><span>✓</span> 스토리 구조 &amp; 분기 생성</div>
+            <div class="demo-step done"><span>✓</span> 대화문 작성 완료</div>
+            <div class="demo-step done"><span>✓</span> 캐릭터 스프라이트 생성</div>
+            <div class="demo-step active"><span>◎</span> 배경 이미지 생성 중...</div>
+            <div class="demo-step"><span style="color:var(--text-dim)">○</span> BGM 작곡</div>
+            <div class="demo-step"><span style="color:var(--text-dim)">○</span> 웹 플레이어 패키징</div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-right">
+        <div class="vn-bg-glow"></div>
+        <div class="vn-char-group">
+          <div class="vn-char vn-char-a"><div class="vn-face-a"></div></div>
+          <div class="vn-char vn-char-b"><div class="vn-face-b"></div></div>
+        </div>
+        <div class="vn-dialogue-wrap">
+          <div class="vn-namebox">천우</div>
+          <div class="vn-textbox">
+            "후손이라고? 그런 허황된 이야기를... 직접 증명해봐."
+          </div>
+          <div class="vn-choices">
+            <div class="vn-choice">▶ 마법을 시전한다</div>
+            <div class="vn-choice">　 조용히 물러선다</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section id="steps">
+  <div class="section-h2" style="margin-bottom:.6rem">3단계로 완성</div>
+  <p class="section-p">복잡한 설정 없이. 시놉시스 하나면 충분합니다.</p>
+  <div class="steps-row">
+    <div class="step-card reveal">
+      <div class="step-num">1</div>
+      <h3>시놉시스 작성</h3>
+      <p>배경, 등장인물, 핵심 갈등을 간단히 적어주세요. 한 문단으로 충분합니다.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">2</div>
+      <h3>AI 자동 생성</h3>
+      <p>스토리 분기·대화·캐릭터·배경·BGM을 AI가 자동으로 완성합니다. 약 3~5분 소요.</p>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">3</div>
+      <h3>공유 &amp; 반응 확인</h3>
+      <p>링크 하나로 즉시 공유. 독자 데이터로 내 이야기의 시장성을 검증하세요.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="features-inner">
+    <div class="chip">✦ Features</div>
+    <h2 class="section-h2">필요한 건 다 있어요</h2>
+    <p class="section-p">비주얼 노벨 제작에 필요한 모든 것이 자동화되어 있습니다.</p>
+    <div class="features-grid">
+      <div class="feat reveal"><span class="feat-icon">📖</span><h4>스토리 자동 생성</h4><p>분기 선택지와 대화문까지. 정밀하게 제어되는 내러티브 구조.</p></div>
+      <div class="feat reveal"><span class="feat-icon">🎨</span><h4>캐릭터 &amp; 배경</h4><p>fal.ai 기반 이미지 생성. 분위기에 맞는 비주얼이 자동 완성.</p></div>
+      <div class="feat reveal"><span class="feat-icon">🎵</span><h4>BGM 자동 작곡</h4><p>장면 분위기에 맞는 배경음악. 저작권 걱정 없이 사용 가능.</p></div>
+      <div class="feat reveal"><span class="feat-icon">🌐</span><h4>웹 플레이어</h4><p>Phaser 엔진 기반. 설치 없이 브라우저에서 바로 플레이 &amp; 공유.</p></div>
+      <div class="feat reveal"><span class="feat-icon">📊</span><h4>독자 반응 분석</h4><p>어떤 장면에서 이탈하는지 데이터로 확인. 실질적인 PMF 검증.</p></div>
+      <div class="feat reveal"><span class="feat-icon">⚡</span><h4>빠른 반복 검증</h4><p>3분 안에 플레이 가능한 노벨로. 주 1회 아이디어 검증이 가능한 속도.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="chip">✦ Pricing</div>
+  <h2 class="section-h2">얼리버드 특가</h2>
+  <p class="section-p">베타 기간에만 제공하는 특별 할인입니다.</p>
+
+  <div class="pricing-grid">
+    <!-- FREE -->
+    <div class="price-card reveal">
+      <div class="price-tier">Free</div>
+      <div class="price-main">0</div>
+      <div class="price-period">원 · 체험용</div>
+      <div class="price-divider"></div>
+      <ul class="price-list">
+        <li><span class="ck">✓</span> 노벨 생성 1회</li>
+        <li><span class="ck">✓</span> 웹 플레이어 공유</li>
+        <li><span class="no">✗</span><span class="dim"> 캐릭터 이미지 생성</span></li>
+        <li><span class="no">✗</span><span class="dim"> BGM 자동 생성</span></li>
+        <li><span class="no">✗</span><span class="dim"> 독자 반응 분석</span></li>
+      </ul>
+      <a href="#signup" class="btn-price outline">무료로 시작</a>
+    </div>
+
+    <!-- EARLY BIRD -->
+    <div class="price-card featured reveal">
+      <div class="feat-label">🔥 얼리버드 추천</div>
+      <div class="price-tier">Early Bird</div>
+      <div class="price-main gradient">5,000</div>
+      <div class="price-period">원 / 월</div>
+      <div class="price-orig"><s>정가 50,000원</s> · <span class="disc">90% 할인</span></div>
+      <div class="price-divider"></div>
+      <ul class="price-list">
+        <li><span class="ck">✓</span> 노벨 생성 <strong>10회</strong> / 월</li>
+        <li><span class="ck">✓</span> 캐릭터 스프라이트 생성</li>
+        <li><span class="ck">✓</span> 배경 이미지 &amp; BGM</li>
+        <li><span class="ck">✓</span> 독자 반응 대시보드</li>
+        <li><span class="ck">✓</span> 얼리버드 Discord 채널</li>
+        <li><span class="ck">✓</span> 정식 출시 시 업그레이드 할인</li>
+      </ul>
+      <a href="#signup" class="btn-price fill">얼리버드 신청하기 →</a>
+      <div class="spots-row"><div class="live-dot"></div> 100명 한정 · 신청 접수 중</div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="price-card reveal" style="opacity:.55;">
+      <div class="price-tier">Team</div>
+      <div class="price-main" style="font-size:1.5rem;color:var(--text-dim);">준비 중</div>
+      <div class="price-period">정식 출시 후 공개</div>
+      <div class="price-divider"></div>
+      <ul class="price-list">
+        <li><span class="ck">✓</span> 무제한 생성</li>
+        <li><span class="ck">✓</span> 팀 협업 기능</li>
+        <li><span class="ck">✓</span> 커스텀 스타일 가이드</li>
+        <li><span class="ck">✓</span> API 접근</li>
+        <li><span class="ck">✓</span> 전담 지원</li>
+      </ul>
+      <button class="btn-price outline" disabled>Coming Soon</button>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="test-inner">
+    <div class="chip">✦ Testimonials</div>
+    <h2 class="section-h2">베타 테스터들의 이야기</h2>
+    <p class="section-p">실제 사용자들의 솔직한 후기</p>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <blockquote>"시놉시스 하나 넣었는데 진짜 플레이 가능한 노벨이 3분 만에 나왔어요. 믿기지 않았어요."</blockquote>
+        <div class="test-author">
+          <div class="test-ava" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">김</div>
+          <div><div class="test-name">김지수</div><div class="test-role">웹소설 작가 · 3년차</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <blockquote>"어떤 장면에서 독자가 이탈하는지 데이터로 보이니까, 어디를 고쳐야 할지 바로 알 수 있었어요."</blockquote>
+        <div class="test-author">
+          <div class="test-ava" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">이</div>
+          <div><div class="test-name">이민서</div><div class="test-role">시나리오 작가</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★☆</div>
+        <blockquote>"캐릭터 그림과 BGM까지 분위기에 맞게 나오는 게 정말 신기했어요. 아이디어 검증에 딱이에요."</blockquote>
+        <div class="test-author">
+          <div class="test-ava" style="background:linear-gradient(135deg,#14b8a6,#0ea5e9)">박</div>
+          <div><div class="test-name">박하늘</div><div class="test-role">판타지 소설 작가</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="faq-inner">
+    <div class="chip">✦ FAQ</div>
+    <h2 class="section-h2">자주 묻는 질문</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">코딩이나 그림 실력이 없어도 되나요? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><div class="faq-a-inner">전혀 필요 없습니다. 시놉시스(이야기 개요)만 텍스트로 입력하면 AI가 캐릭터·배경·BGM까지 전부 자동 생성합니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">얼리버드는 언제까지 신청 가능한가요? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><div class="faq-a-inner">100명 한정 선착순이며, 정원 마감 시 조기 종료됩니다. 신청 후 베타 오픈 시 이메일로 안내드립니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">생성된 콘텐츠의 저작권은 누구에게 있나요? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><div class="faq-a-inner">생성된 모든 콘텐츠의 저작권은 원고를 입력한 작가님께 귀속됩니다. 상업적 활용도 가능합니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="faq(this)">얼마나 긴 이야기를 만들 수 있나요? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><div class="faq-a-inner">현재 베타 기준으로 챕터당 10~15개 장면, 3개 분기 선택지를 지원합니다. 정식 출시 시 더 긴 스토리가 추가됩니다.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="cta-final">
+  <h2>내 이야기를<br>세상에 꺼내세요</h2>
+  <p>비주얼 노벨을 만들고 싶었는데 기술이 없어서 포기했다면 — 이야기가 해결합니다.</p>
+  <a href="#signup" class="btn-hero-cta">얼리버드 신청하기 (5천원) →</a>
+  <p style="margin-top:1rem;font-size:.78rem;color:var(--text-dim);">100명 한정 · 무료 취소 가능</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <div class="logo-icon">이</div>
+    이야기 (iyagi)
+  </div>
+  <div>© 2026 iyagi · AI Visual Novel Engine</div>
+  <div>Made with 🔨 HKG Guild</div>
+</footer>
+
+<script>
+// FAQ
+function faq(btn) {
+  const item = btn.closest('.faq-item');
+  const open = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!open) item.classList.add('open');
+}
+
+// Form
+const form = document.getElementById('heroForm');
+const successMsg = document.getElementById('successMsg');
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = form.querySelector('button');
+  btn.textContent = '신청 중...'; btn.disabled = true;
+  try {
+    const res = await fetch(form.action, { method:'POST', body:new FormData(form), headers:{Accept:'application/json'} });
+    if (res.ok) { form.style.display='none'; successMsg.style.display='block'; }
+    else { btn.textContent='다시 시도해주세요'; btn.disabled=false; }
+  } catch { btn.textContent='얼리버드 신청 →'; btn.disabled=false; }
+});
+
+// Scroll reveal
+const io = new IntersectionObserver(
+  entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+  { threshold: 0.08 }
+);
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
