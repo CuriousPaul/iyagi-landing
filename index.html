@@ -549,10 +549,10 @@
     }
 
     .pricing-grid {
-      display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem;
-      margin-top:3rem; align-items:stretch;
+      display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;
+      margin-top:3rem; align-items:start; max-width:680px; margin-left:auto; margin-right:auto;
     }
-    @media(max-width:720px){.pricing-grid{grid-template-columns:1fr;}}
+    @media(max-width:580px){.pricing-grid{grid-template-columns:1fr;}}
 
     .price-card {
       background:var(--bg-1);
@@ -964,22 +964,6 @@
   <p class="section-p">베타 기간에만 제공하는 특별 할인입니다.</p>
 
   <div class="pricing-grid">
-    <!-- FREE -->
-    <div class="price-card reveal">
-      <div class="price-tier">Free</div>
-      <div class="price-main">0</div>
-      <div class="price-period">원 · 체험용</div>
-      <div class="price-divider"></div>
-      <ul class="price-list">
-        <li><span class="ck">✓</span> 노벨 생성 1회</li>
-        <li><span class="ck">✓</span> 웹 플레이어 공유</li>
-        <li><span class="no">✗</span><span class="dim"> 캐릭터 이미지 생성</span></li>
-        <li><span class="no">✗</span><span class="dim"> BGM 자동 생성</span></li>
-        <li><span class="no">✗</span><span class="dim"> 독자 반응 분석</span></li>
-      </ul>
-      <a href="#signup" class="btn-price outline">무료로 시작</a>
-    </div>
-
     <!-- EARLY BIRD -->
     <div class="price-card featured reveal">
       <div class="feat-label">🔥 얼리버드 추천</div>
