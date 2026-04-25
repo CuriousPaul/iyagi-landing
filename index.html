@@ -461,6 +461,56 @@
     .step-card h3 { font-size:1rem; font-weight:700; margin-bottom:.4rem; }
     .step-card p { font-size:.85rem; color:var(--text-sub); line-height:1.65; }
 
+
+    /* ─── Key Feature 3-card ─── */
+    .key-features { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-top:3rem; }
+    @media(max-width:768px){.key-features{grid-template-columns:1fr;}}
+
+    .key-feat {
+      background:var(--bg-1); border:1px solid var(--border);
+      border-radius:20px; padding:2.2rem 1.8rem;
+      text-align:left; position:relative; overflow:hidden;
+      transition:border-color .25s, box-shadow .25s, transform .25s;
+    }
+    .key-feat:hover { border-color:var(--border-hi); box-shadow:var(--glow-purple); transform:translateY(-3px); }
+    .key-feat::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,var(--purple-d),var(--pink));
+      opacity:0; transition:opacity .25s;
+    }
+    .key-feat:hover::before { opacity:1; }
+
+    .kf-num { font-size:.65rem; font-weight:800; color:var(--purple); letter-spacing:.12em; text-transform:uppercase; margin-bottom:.9rem; display:block; }
+    .kf-icon {
+      width:48px; height:48px; border-radius:14px;
+      background:linear-gradient(135deg,rgba(123,101,232,.2),rgba(240,122,255,.1));
+      border:1px solid rgba(160,140,255,.2);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; margin-bottom:1.2rem;
+    }
+    .key-feat h3 { font-size:1.02rem; font-weight:800; margin-bottom:.6rem; line-height:1.35; letter-spacing:-.02em; }
+    .key-feat > p { font-size:.85rem; color:var(--text-sub); line-height:1.72; margin-bottom:1.1rem; }
+
+    .kf-tags { display:flex; flex-wrap:wrap; gap:.4rem; }
+    .kf-tag {
+      display:inline-flex; align-items:center; gap:.25rem;
+      background:rgba(160,140,255,.07); border:1px solid rgba(160,140,255,.15);
+      color:var(--purple); font-size:.68rem; font-weight:600;
+      padding:.18rem .6rem; border-radius:100px; white-space:nowrap;
+    }
+
+    /* sub features row */
+    .sub-features {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+      gap:1px; margin-top:1.2rem;
+      border:1px solid var(--border); border-radius:14px; overflow:hidden;
+    }
+    .sub-feat { padding:1.3rem 1.2rem; background:var(--bg-1); text-align:left; transition:background .2s; }
+    .sub-feat:hover { background:var(--bg-2); }
+    .sub-feat-icon { font-size:1.2rem; margin-bottom:.5rem; display:block; }
+    .sub-feat h5 { font-size:.84rem; font-weight:700; margin-bottom:.22rem; }
+    .sub-feat p { font-size:.77rem; color:var(--text-sub); line-height:1.6; }
+
     /* ───── FEATURES ───── */
     #features {
       padding:7rem 1.5rem;
@@ -715,8 +765,8 @@
   </h1>
 
   <p class="hero-desc">
-    스토리·캐릭터·배경·BGM — AI가 전부 만들어줍니다.<br>
-    작가님은 아이디어만 주세요.
+    스토리 생성·분기 버저닝·캐릭터·배경 이미지 자동 생성.<br>
+    즉시 플레이 가능한 웹 위젯으로 완성됩니다.
   </p>
 
   <div id="signup" class="form-wrap">
@@ -836,16 +886,73 @@
 <!-- FEATURES -->
 <section id="features">
   <div class="features-inner">
-    <div class="chip">✦ Features</div>
-    <h2 class="section-h2">필요한 건 다 있어요</h2>
-    <p class="section-p">비주얼 노벨 제작에 필요한 모든 것이 자동화되어 있습니다.</p>
-    <div class="features-grid">
-      <div class="feat reveal"><span class="feat-icon">📖</span><h4>스토리 자동 생성</h4><p>분기 선택지와 대화문까지. 정밀하게 제어되는 내러티브 구조.</p></div>
-      <div class="feat reveal"><span class="feat-icon">🎨</span><h4>캐릭터 &amp; 배경</h4><p>fal.ai 기반 이미지 생성. 분위기에 맞는 비주얼이 자동 완성.</p></div>
-      <div class="feat reveal"><span class="feat-icon">🎵</span><h4>BGM 자동 작곡</h4><p>장면 분위기에 맞는 배경음악. 저작권 걱정 없이 사용 가능.</p></div>
-      <div class="feat reveal"><span class="feat-icon">🌐</span><h4>웹 플레이어</h4><p>Phaser 엔진 기반. 설치 없이 브라우저에서 바로 플레이 &amp; 공유.</p></div>
-      <div class="feat reveal"><span class="feat-icon">📊</span><h4>독자 반응 분석</h4><p>어떤 장면에서 이탈하는지 데이터로 확인. 실질적인 PMF 검증.</p></div>
-      <div class="feat reveal"><span class="feat-icon">⚡</span><h4>빠른 반복 검증</h4><p>3분 안에 플레이 가능한 노벨로. 주 1회 아이디어 검증이 가능한 속도.</p></div>
+    <div class="chip">✦ Key Features</div>
+    <h2 class="section-h2">3가지 핵심 기능</h2>
+    <p class="section-p">이야기가 제공하는 차별화된 기능들</p>
+
+    <div class="key-features">
+
+      <!-- KEY 01 -->
+      <div class="key-feat reveal">
+        <span class="kf-num">Key Feature 01</span>
+        <div class="kf-icon">📖</div>
+        <h3>시놉시스 기반 AI 스토리 생성 &amp; 분기 버저닝</h3>
+        <p>시놉시스 한 줄이면 AI가 전체 스토리 구조와 대화문을 자동으로 생성합니다. 다양한 분기를 버전으로 관리해 이야기의 가능성을 탐색하세요.</p>
+        <div class="kf-tags">
+          <span class="kf-tag">✦ AI 스토리 생성</span>
+          <span class="kf-tag">✦ 분기 선택지</span>
+          <span class="kf-tag">✦ 버전 관리</span>
+          <span class="kf-tag">✦ 대화문 자동 작성</span>
+        </div>
+      </div>
+
+      <!-- KEY 02 -->
+      <div class="key-feat reveal">
+        <span class="kf-num">Key Feature 02</span>
+        <div class="kf-icon">🎨</div>
+        <h3>스토리 맞춤 캐릭터·배경 이미지 자동 생성</h3>
+        <p>AI가 스토리의 분위기와 설정을 분석해 캐릭터 스프라이트와 배경 이미지를 자동으로 만들어줍니다. 별도의 디자인 작업 없이 완성도 높은 비주얼을 얻으세요.</p>
+        <div class="kf-tags">
+          <span class="kf-tag">✦ 캐릭터 스프라이트</span>
+          <span class="kf-tag">✦ 배경 이미지</span>
+          <span class="kf-tag">✦ 분위기 분석</span>
+          <span class="kf-tag">✦ fal.ai 기반</span>
+        </div>
+      </div>
+
+      <!-- KEY 03 -->
+      <div class="key-feat reveal">
+        <span class="kf-num">Key Feature 03</span>
+        <div class="kf-icon">🎮</div>
+        <h3>즉시 플레이 가능한 비주얼 노벨 웹 위젯</h3>
+        <p>생성된 노벨은 설치나 별도 앱 없이 브라우저에서 바로 플레이할 수 있는 Production Ready 웹 위젯으로 제공됩니다. 링크 하나로 독자와 즉시 공유하세요.</p>
+        <div class="kf-tags">
+          <span class="kf-tag">✦ Production Ready</span>
+          <span class="kf-tag">✦ 웹 위젯</span>
+          <span class="kf-tag">✦ 즉시 공유</span>
+          <span class="kf-tag">✦ Phaser 엔진</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 부가 기능 -->
+    <div class="sub-features">
+      <div class="sub-feat reveal">
+        <span class="sub-feat-icon">🎵</span>
+        <h5>BGM 자동 생성</h5>
+        <p>장면 분위기에 맞는 배경음악. 저작권 걱정 없이.</p>
+      </div>
+      <div class="sub-feat reveal">
+        <span class="sub-feat-icon">📊</span>
+        <h5>독자 반응 분석</h5>
+        <p>어떤 장면에서 이탈하는지 데이터로 확인. 실질적 PMF 검증.</p>
+      </div>
+      <div class="sub-feat reveal">
+        <span class="sub-feat-icon">⚡</span>
+        <h5>3분 완성</h5>
+        <p>시놉시스 입력부터 플레이까지 약 3분. 주 1회 검증 사이클 가능.</p>
+      </div>
     </div>
   </div>
 </section>
