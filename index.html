@@ -736,6 +736,144 @@
       .btn-submit{width:100%;}
       .nav-links{display:none;}
     }
+  
+    /* ─────────────────── BOTTOM SHEET ─────────────────── */
+    .bs-backdrop {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0);
+      pointer-events: none;
+      transition: background .3s ease;
+    }
+    .bs-backdrop.open {
+      background: rgba(0,0,0,0.65);
+      pointer-events: all;
+      backdrop-filter: blur(4px);
+    }
+
+    .bottom-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 501;
+      background: var(--bg-1);
+      border-top: 1px solid var(--border-hi);
+      border-radius: 24px 24px 0 0;
+      padding: 0 1.5rem 2.5rem;
+      transform: translateY(100%);
+      transition: transform .4s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 -8px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(160,140,255,.1);
+      max-width: 560px;
+      margin: 0 auto;
+      /* centering on desktop */
+      left: 50%; transform: translate(-50%, 100%);
+    }
+    .bottom-sheet.open {
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 600px) {
+      .bottom-sheet {
+        left: 0; right: 0; max-width: 100%;
+        transform: translateY(100%);
+        margin: 0;
+      }
+      .bottom-sheet.open {
+        transform: translateY(0);
+      }
+    }
+
+    .bs-handle {
+      width: 40px; height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 100px;
+      margin: 14px auto 0;
+      cursor: grab;
+    }
+
+    .bs-header {
+      text-align: center;
+      padding: 1.4rem 0 1.2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+
+    .bs-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(233,30,140,0.12);
+      border: 1px solid rgba(233,30,140,0.3);
+      color: #ff8ec5; font-size: .72rem; font-weight: 700;
+      padding: .25rem .8rem; border-radius: 100px;
+      letter-spacing: .04em;
+      margin-bottom: .9rem;
+    }
+
+    .bs-title {
+      font-size: 1.3rem; font-weight: 800;
+      letter-spacing: -.025em; line-height: 1.25;
+      color: var(--text); margin-bottom: .4rem;
+      word-break: keep-all;
+    }
+
+    .bs-sub {
+      font-size: .85rem; color: var(--text-sub); line-height: 1.6;
+    }
+
+    .bs-form {
+      display: flex; flex-direction: column; gap: .75rem;
+    }
+
+    .bs-input {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-family: 'Pretendard', sans-serif;
+      font-size: .95rem;
+      padding: .85rem 1.1rem;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color .2s;
+      width: 100%;
+    }
+    .bs-input:focus {
+      border-color: var(--border-hi);
+      box-shadow: 0 0 0 3px rgba(160,140,255,.15);
+    }
+    .bs-input::placeholder { color: var(--text-dim); }
+
+    .bs-submit {
+      background: linear-gradient(135deg, var(--purple-d) 0%, var(--pink) 100%);
+      color: #fff; border: none;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 1rem; font-weight: 800;
+      padding: .9rem;
+      border-radius: 12px; cursor: pointer;
+      box-shadow: 0 0 24px rgba(160,140,255,.35);
+      transition: box-shadow .2s, transform .15s;
+    }
+    .bs-submit:hover { box-shadow: 0 0 40px rgba(160,140,255,.6); transform: translateY(-1px); }
+
+    .bs-hint {
+      text-align: center; font-size: .75rem; color: var(--text-dim);
+      margin-top: .2rem;
+    }
+    .bs-hint strong { color: var(--pink); }
+    .bs-hint s { text-decoration-color: rgba(255,255,255,.2); }
+
+    .bs-success {
+      display: none;
+      text-align: center; padding: 1.5rem;
+      color: var(--purple); font-size: 1rem; font-weight: 600;
+    }
+    .bs-success .bs-success-icon { font-size: 2rem; margin-bottom: .5rem; }
+
+    .bs-close {
+      position: absolute; top: 18px; right: 1.2rem;
+      background: rgba(255,255,255,0.06); border: none;
+      color: var(--text-dim); font-size: 1rem;
+      width: 30px; height: 30px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .bs-close:hover { background: rgba(255,255,255,0.12); }
+
+
   </style>
 </head>
 <body>
@@ -760,13 +898,11 @@
     완성된 노벨은 링크 하나로 독자와 바로 공유할 수 있어요.
   </p>
 
-  <div id="signup" class="form-wrap">
-    <form class="email-row" id="heroForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-      <input type="email" name="email" placeholder="이메일 주소를 입력하세요" required autocomplete="email">
-      <button type="submit" class="btn-submit">얼리버드 신청 →</button>
-    </form>
-    <div class="success-msg" id="successMsg">🎉 신청 완료! 베타 오픈 시 이메일로 알려드릴게요.</div>
-    <p class="form-hint">얼리버드 <strong>5,000원</strong> · 정가 <s>50,000원</s> · 무료 취소 가능</p>
+  <div id="signup" class="form-wrap" style="animation:fadeUp .7s .4s both; opacity:0;">
+    <button class="btn-submit" onclick="openBS()" style="font-size:1.05rem; padding:.85rem 2.4rem; border-radius:14px; border:none; cursor:pointer;">
+      한번 써볼게요 →
+    </button>
+    <p class="form-hint" style="margin-top:.75rem">얼리버드 <strong>5,000원</strong> · 정가 <s>50,000원</s> · 100명 한정</p>
   </div>
 </section>
 
@@ -971,7 +1107,7 @@
         <li><span class="ck">✓</span> 얼리버드 Discord 채널</li>
         <li><span class="ck">✓</span> 정식 출시 시 업그레이드 할인</li>
       </ul>
-      <a href="#signup" class="btn-price fill">얼리버드 신청하기 →</a>
+      <button class="btn-price fill" onclick="openBS()">얼리버드 신청하기 →</button>
       <div class="spots-row"><div class="live-dot"></div> 100명 한정 · 신청 접수 중</div>
     </div>
 
@@ -1058,7 +1194,7 @@
 <section id="cta-final">
   <h2>내 이야기가<br>게임이 되는 경험</h2>
   <p>비주얼 노벨 만들고 싶었는데 그림도 코딩도 모른다고 포기했다면 — 한번만 써보세요.</p>
-  <a href="#signup" class="btn-hero-cta">한번 써볼게요 →</a>
+  <button class="btn-hero-cta" onclick="openBS()">한번 써볼게요 →</button>
   <p style="margin-top:1rem;font-size:.78rem;color:var(--text-dim);">얼리버드 5,000원 · 100명 한정 · 무료 취소 가능</p>
 </section>
 
@@ -1101,6 +1237,88 @@ const io = new IntersectionObserver(
   { threshold: 0.08 }
 );
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// ── Bottom Sheet
+function openBS() {
+  document.getElementById('bottomSheet').classList.add('open');
+  document.getElementById('bsBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('bsEmail').focus(), 400);
+}
+function closeBS() {
+  document.getElementById('bottomSheet').classList.remove('open');
+  document.getElementById('bsBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// ESC로 닫기
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBS(); });
+
+// Bottom sheet form
+const bsForm = document.getElementById('bsForm');
+const bsSuccess = document.getElementById('bsSuccess');
+bsForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = bsForm.querySelector('button[type=submit]');
+  btn.textContent = '신청 중...'; btn.disabled = true;
+  try {
+    const res = await fetch(bsForm.action, {
+      method: 'POST', body: new FormData(bsForm),
+      headers: { Accept: 'application/json' }
+    });
+    if (res.ok) {
+      bsForm.style.display = 'none';
+      bsSuccess.style.display = 'block';
+      setTimeout(closeBS, 2500);
+    } else {
+      btn.textContent = '다시 시도해주세요'; btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = '얼리버드 신청하기 →'; btn.disabled = false;
+  }
+});
+
+// 터치 스와이프 다운으로 닫기
+let startY = 0;
+const sheet = document.getElementById('bottomSheet');
+sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
+sheet.addEventListener('touchend', e => {
+  if (e.changedTouches[0].clientY - startY > 80) closeBS();
+}, {passive:true});
+
 </script>
+
+<!-- BOTTOM SHEET BACKDROP -->
+<div class="bs-backdrop" id="bsBackdrop" onclick="closeBS()"></div>
+
+<!-- BOTTOM SHEET -->
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="bs-handle"></div>
+  <button class="bs-close" onclick="closeBS()" aria-label="닫기">✕</button>
+
+  <div class="bs-header">
+    <div class="bs-badge">⚡ 얼리버드 · 100명 한정</div>
+    <div class="bs-title">내 이야기가 독자한테<br>먹힐지 확인해봐요</div>
+    <p class="bs-sub">이메일 남겨두시면 베타 오픈 때 바로 알려드릴게요.<br>취소는 언제든 자유예요.</p>
+  </div>
+
+  <form class="bs-form" id="bsForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <input
+      type="email" name="email"
+      class="bs-input"
+      placeholder="이메일 주소 입력"
+      required autocomplete="email"
+      id="bsEmail"
+    >
+    <button type="submit" class="bs-submit">얼리버드 신청하기 →</button>
+    <p class="bs-hint">얼리버드 <strong>5,000원</strong> · 정가 <s>50,000원</s> · 무료 취소</p>
+  </form>
+
+  <div class="bs-success" id="bsSuccess">
+    <div class="bs-success-icon">🎉</div>
+    <div>신청 완료!</div>
+    <p style="font-size:.85rem;color:var(--text-sub);margin-top:.4rem;font-weight:400">베타 오픈 때 이메일로 알려드릴게요.</p>
+  </div>
+</div>
+
 </body>
 </html>
