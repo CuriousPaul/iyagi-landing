@@ -726,9 +726,9 @@
     .footer-logo{display:flex;align-items:center;gap:.6rem;color:var(--text-sub);}
     .footer-logo .logo-icon{width:26px;height:26px;border-radius:7px;font-size:.78rem;box-shadow:none;}
 
-    /* ───── SCROLL REVEAL ───── */
-    .reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease;}
-    .reveal.in{opacity:1;transform:translateY(0);}
+    /* ───── SCROLL REVEAL (disabled for smoke test) ───── */
+    .reveal{opacity:1 !important;transform:none !important;}
+    .reveal.in{opacity:1;transform:none;}
 
     /* ───── RESPONSIVE ───── */
     @media(max-width:500px){
