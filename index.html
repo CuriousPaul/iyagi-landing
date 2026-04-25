@@ -120,7 +120,7 @@
       min-height:100vh;
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       text-align:center;
-      padding: 8rem 1.5rem 5rem;
+      padding: 5rem 1.5rem 4rem;
     }
 
     /* 배경 빛 기둥 */
@@ -133,6 +133,7 @@
     }
 
     .hero-eyebrow {
+      word-break: keep-all;
       display:inline-flex; align-items:center; gap:.5rem;
       border:1px solid rgba(160,140,255,0.3);
       background: rgba(160,140,255,0.06);
@@ -155,12 +156,14 @@
     }
 
     h1 {
-      font-size: clamp(2.8rem, 7.5vw, 5.6rem);
+      font-size: clamp(2rem, 7.5vw, 5.6rem);
       font-weight: 800;
       letter-spacing: -.04em;
-      line-height: 1.1;
+      line-height: 1.15;
       margin-bottom: 1.5rem;
       animation: fadeUp .7s .2s both;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
 
     .h1-line1 { display:block; color:var(--text); }
@@ -171,7 +174,8 @@
     }
 
     .hero-desc {
-      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      font-size: clamp(.95rem, 2.2vw, 1.15rem);
+      word-break: keep-all;
       font-weight:400; color:var(--text-sub);
       max-width:520px; margin:0 auto 3rem;
       line-height:1.8;
@@ -736,19 +740,6 @@
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a class="logo" href="#">
-    <div class="logo-icon">이</div>
-    <span class="logo-text">이야기&ensp;<span style="font-weight:400;font-size:.85rem;">iyagi</span></span>
-  </a>
-  <ul class="nav-links">
-    <li><a href="#how">작동 방식</a></li>
-    <li><a href="#features">기능</a></li>
-    <li><a href="#pricing">가격</a></li>
-    <li><a href="#signup" class="btn-nav">얼리버드 신청</a></li>
-  </ul>
-</nav>
 
 <!-- HERO -->
 <section id="hero">
@@ -785,11 +776,11 @@
 <div id="proof">
   <div class="proof-item">
     <div class="proof-avatar-stack">
-      <div class="proof-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">김</div>
-      <div class="proof-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">이</div>
-      <div class="proof-avatar" style="background:linear-gradient(135deg,#14b8a6,#0ea5e9)">박</div>
-      <div class="proof-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316)">최</div>
-      <div class="proof-avatar" style="background:linear-gradient(135deg,var(--purple-d),var(--pink))">+</div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)"></div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"></div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#14b8a6,#0ea5e9)"></div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316)"></div>
+      <div class="proof-avatar" style="background:linear-gradient(135deg,var(--purple-d),var(--pink)); font-size:.65rem">42+</div>
     </div>
     <div class="proof-stat"><strong>42명</strong>의 <span>작가가 먼저 써보고 있어요</span></div>
   </div>
@@ -1013,24 +1004,24 @@
         <div class="test-stars">★★★★★</div>
         <blockquote>"시놉시스 쓴 거 그냥 넣었는데 3분 만에 진짜 게임처럼 나왔어요. 저 직접 플레이해봤는데 소름 돋았어요."</blockquote>
         <div class="test-author">
-          <div class="test-ava" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">김</div>
-          <div><div class="test-name">김지수</div><div class="test-role">웹소설 작가 · 3년차</div></div>
+          <div class="test-ava" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">🖊</div>
+          <div><div class="test-name">웹소설 작가 (ID: jisu_k)</div><div class="test-role">판타지 장르 · 3년차</div></div>
         </div>
       </div>
       <div class="test-card reveal">
         <div class="test-stars">★★★★★</div>
         <blockquote>"3화에서 독자들이 다 나간다는 걸 알게 됐어요. 뭐가 문제인지 감은 있었는데 확인이 되니까 바로 고칠 수 있었어요."</blockquote>
         <div class="test-author">
-          <div class="test-ava" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">이</div>
-          <div><div class="test-name">이민서</div><div class="test-role">시나리오 작가</div></div>
+          <div class="test-ava" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">✏️</div>
+          <div><div class="test-name">시나리오 작가 (ID: ms_writer)</div><div class="test-role">로맨스 · 학원물 전문</div></div>
         </div>
       </div>
       <div class="test-card reveal">
         <div class="test-stars">★★★★☆</div>
         <blockquote>"그림 그리는 친구한테 부탁해야 하나 고민했는데, 이걸로 바로 내 캐릭터 그림이 나오더라고요. 신기했어요."</blockquote>
         <div class="test-author">
-          <div class="test-ava" style="background:linear-gradient(135deg,#14b8a6,#0ea5e9)">박</div>
-          <div><div class="test-name">박하늘</div><div class="test-role">판타지 소설 작가</div></div>
+          <div class="test-ava" style="background:linear-gradient(135deg,#14b8a6,#0ea5e9)">📝</div>
+          <div><div class="test-name">소설 작가 (ID: sky_novel)</div><div class="test-role">이세계·판타지 장르</div></div>
         </div>
       </div>
     </div>
