@@ -1443,8 +1443,9 @@ bsForm.addEventListener('submit', async e => {
   btn.textContent = '신청 중...'; btn.disabled = true;
   try {
     const res = await fetch(bsForm.action, {
-      method: 'POST', body: new FormData(bsForm),
-      headers: { Accept: 'application/json' }
+      method: 'POST',
+      body: JSON.stringify({ email: document.getElementById('bsEmail').value }),
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
     });
     if (res.ok) {
       bsForm.style.display = 'none';
@@ -1482,7 +1483,7 @@ sheet.addEventListener('touchend', e => {
     <p class="bs-sub">이메일 남겨두시면 베타 오픈 때 바로 알려드릴게요.<br>취소는 언제든 자유예요.</p>
   </div>
 
-  <form class="bs-form" id="bsForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+  <form class="bs-form" id="bsForm" action="/api/submit" method="POST">
     <input
       type="email" name="email"
       class="bs-input"
